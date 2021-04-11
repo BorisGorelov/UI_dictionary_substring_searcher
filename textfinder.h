@@ -37,7 +37,6 @@ private:
     QPlainTextEdit *ui_textEdit;
     QLineEdit *ui_lineEdit;
     QList<QByteArray> data;
-    QByteArray search_result;
 };
 
 #endif // TEXTFINDER_H

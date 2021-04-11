@@ -16,10 +16,8 @@ TextFinder::TextFinder(QWidget *parent)
     ui_textEdit = findChild<QPlainTextEdit*>("plainTextEdit");
     ui_lineEdit = findChild<QLineEdit*>("lineEdit");
     
-//    QMetaObject::connectSlotsByName(this);
     connect(ui_lineEdit, SIGNAL(textEdited(QString)), this, SLOT(any_button_pressed(QString)));
 
-    // put this in other thread
     QFile inputFile(":/forms/input.txt");
     inputFile.open(QIODevice::ReadOnly);
     QByteArray raw = inputFile.readAll();
@@ -38,7 +36,6 @@ void TextFinder::any_button_pressed(QString s) {
     }
 
     QByteArrayMatcher s_matcher(s.toUtf8());
-    search_result.clear();
 
     auto check = [&](const QByteArray& qb) {
         return (s_matcher.indexIn((qb)) != -1);
@@ -46,63 +43,15 @@ void TextFinder::any_button_pressed(QString s) {
 
     QFuture<QByteArray> s_r = QtConcurrent::filtered(data, check);
     auto s_r_results = s_r.results();
-//    if (s_r_results.size() > 1000) {
-
-//    }
-    ui_textEdit->setPlainText(QString(s_r_results.join('\n')));
-
-//    foreach (const auto& item, data) {
-//        int match = s_matcher.indexIn(item);
-//        if (match != -1) {
-//            // put string with highlited pattern into buffer
-//            // print this buffer at the end;
-//            search_result.append(item + '\n');
-//        }
-//    }
-//    ui_textEdit->clear();
-//    ui_textEdit->setText(search_result);
+    int printed = s_r_results.size();
+    int size = s_r_results.size();
+    if (s_r_results.size() > 1000) {
+        for (int i = 0; i < 1000; ++i) {
+            ui_textEdit->appendPlainText(s_r_results[i]);
+        }
+        printed = 1000;
+    } else {
+        ui_textEdit->setPlainText(s_r_results.join('\n'));
+    }
+    ui_textEdit->appendPlainText(QString(printed) + " of " + QString(size));
 }
-//void TextFinder::on_findButton_clicked()
-//{
-//    QString searchString = ui_lineEdit->text();
-//    QTextDocument *document = ui_textEdit->document();
-
-//    bool found = false;
-
-//    // undo previous change (if any)
-//    document->undo();
-
-//    if (searchString.isEmpty()) {
-//        QMessageBox::information(this, tr("Empty Search Field"),
-//                                 tr("The search field is empty. "
-//                                    "Please enter a word and click Find."));
-//    } else {
-//        QTextCursor highlightCursor(document);
-//        QTextCursor cursor(document);
-
-//        cursor.beginEditBlock();
-
-//        QTextCharFormat plainFormat(highlightCursor.charFormat());
-//        QTextCharFormat colorFormat = plainFormat;
-//        colorFormat.setForeground(Qt::red);
-
-//        while (!highlightCursor.isNull() && !highlightCursor.atEnd()) {
-//            highlightCursor = document->find(searchString, highlightCursor,
-//                                             QTextDocument::FindWholeWords);
-
-//            if (!highlightCursor.isNull()) {
-//                found = true;
-//                highlightCursor.movePosition(QTextCursor::WordRight,
-//                                             QTextCursor::KeepAnchor);
-//                highlightCursor.mergeCharFormat(colorFormat);
-//            }
-//        }
-
-//        cursor.endEditBlock();
-
-//        if (found == false) {
-//            QMessageBox::information(this, tr("Word Not Found"),
-//                                     tr("Sorry, the word cannot be found."));
-//        }
-//    }
-//}
